@@ -1,25 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>To-Do List</title>
-    <link rel="stylesheet" href="css/styles.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
+    <main class="app">
+        <header class="header">
+            <h1>My To Do List</h1>
+            <form id="todoForm" class="todo-form" autocomplete="off">
+                <label for="todoInput" class="visually-hidden">New task</label>
+                <input type="text" id="todoInput" placeholder="What needs to be done?" maxlength="200">
+                <button type="submit" class="add-btn">Add</button>
+            </form>
+            <p id="formError" class="form-error" role="alert"></p>
+        </header>
 
-    <div id="myDIV" class="header">
-        <h2>My To Do List</h2>
-        <input type="text" id="myInput" placeholder="Title...">
-        <span onclick="newElement()" class="addBtn">Add</span>
-    </div>
+        <nav class="toolbar" aria-label="Filter tasks">
+            <div class="filters">
+                <button type="button" class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
+                <button type="button" class="filter-btn" data-filter="active" aria-pressed="false">Active</button>
+                <button type="button" class="filter-btn" data-filter="completed" aria-pressed="false">Completed</button>
+            </div>
+        </nav>
 
-    <ul id="myUL">
-        <li class="checked">play football</li>
-        <li>Study</li>
-    </ul>
+        <ul id="todoList" class="todo-list"></ul>
+        <p id="emptyState" class="empty-state" hidden>Nothing here yet.</p>
+
+        <footer class="footer">
+            <span id="counter" aria-live="polite"></span>
+            <button type="button" id="clearCompleted" class="link-btn">Clear completed</button>
+        </footer>
+        <p class="hint">Click a task to complete it · double-click to edit</p>
+    </main>
+
     <script src="js/index.js"></script>
 </body>
 

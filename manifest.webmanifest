@@ -1,0 +1,14 @@
+{
+    "name": "مهامي - Task Manager",
+    "short_name": "مهامي",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "dir": "auto",
+    "lang": "ar",
+    "background_color": "#f4f4f6",
+    "theme_color": "#f44336",
+    "icons": [
+        { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    ]
+}

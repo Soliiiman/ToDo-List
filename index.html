@@ -1,44 +1,223 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List</title>
+    <title>مهامي - Task Manager</title>
+    <meta name="theme-color" content="#f44336">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
-    <main class="app">
-        <header class="header">
-            <h1>My To Do List</h1>
-            <form id="todoForm" class="todo-form" autocomplete="off">
-                <label for="todoInput" class="visually-hidden">New task</label>
-                <input type="text" id="todoInput" placeholder="What needs to be done?" maxlength="200">
-                <button type="submit" class="add-btn">Add</button>
-            </form>
-            <p id="formError" class="form-error" role="alert"></p>
-        </header>
-
-        <nav class="toolbar" aria-label="Filter tasks">
-            <div class="filters">
-                <button type="button" class="filter-btn active" data-filter="all" aria-pressed="true">All</button>
-                <button type="button" class="filter-btn" data-filter="active" aria-pressed="false">Active</button>
-                <button type="button" class="filter-btn" data-filter="completed" aria-pressed="false">Completed</button>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar" aria-label="Navigation">
+            <div class="brand">
+                <img src="icon.svg" alt="" width="28" height="28">
+                <span data-i18n="appName"></span>
             </div>
-        </nav>
 
-        <ul id="todoList" class="todo-list"></ul>
-        <p id="emptyState" class="empty-state" hidden>Nothing here yet.</p>
+            <div class="progress-card">
+                <div class="progress-label">
+                    <span data-i18n="doneToday"></span>
+                    <span id="progressText"></span>
+                </div>
+                <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+            </div>
 
-        <footer class="footer">
-            <span id="counter" aria-live="polite"></span>
-            <button type="button" id="clearCompleted" class="link-btn">Clear completed</button>
-        </footer>
-        <p class="hint">Click a task to complete it · double-click to edit</p>
-    </main>
+            <nav id="smartViews" class="nav-group"></nav>
 
-    <script src="js/index.js"></script>
+            <div class="nav-heading">
+                <span data-i18n="lists"></span>
+                <button type="button" id="addListBtn" class="icon-btn small" data-i18n-title="newList">+</button>
+            </div>
+            <nav id="listViews" class="nav-group"></nav>
+        </aside>
+        <div id="backdrop" class="backdrop" hidden></div>
+
+        <!-- Main -->
+        <main class="main">
+            <header class="topbar">
+                <button type="button" id="menuBtn" class="icon-btn menu-btn" data-i18n-title="menu">☰</button>
+                <div class="view-title">
+                    <h1 id="viewTitle"></h1>
+                    <span id="viewCount" class="view-count"></span>
+                </div>
+                <div class="topbar-actions">
+                    <button type="button" id="notifyBtn" class="icon-btn" data-i18n-title="notifications">🔔</button>
+                    <button type="button" id="settingsBtn" class="icon-btn" data-i18n-title="settings">⚙</button>
+                </div>
+            </header>
+
+            <div class="toolbar">
+                <input type="search" id="searchInput" class="search" data-i18n-placeholder="search">
+                <select id="sortSelect" class="sort" data-i18n-title="sortBy">
+                    <option value="due" data-i18n="sortDue"></option>
+                    <option value="priority" data-i18n="sortPriority"></option>
+                    <option value="created" data-i18n="sortCreated"></option>
+                    <option value="title" data-i18n="sortTitle"></option>
+                </select>
+            </div>
+
+            <form id="quickAdd" class="quick-add" autocomplete="off">
+                <input type="text" id="quickInput" maxlength="300" data-i18n-placeholder="quickAdd" required>
+                <button type="submit" class="btn primary" data-i18n="add"></button>
+            </form>
+
+            <div id="taskArea" class="task-area"></div>
+        </main>
+    </div>
+
+    <!-- Task editor -->
+    <dialog id="editor" class="dialog">
+        <form id="editorForm" method="dialog" class="editor">
+            <header class="dialog-header">
+                <h2 id="editorTitle"></h2>
+                <button type="button" class="icon-btn" data-close data-i18n-title="close">✕</button>
+            </header>
+
+            <label class="field">
+                <span data-i18n="title"></span>
+                <input type="text" name="title" maxlength="300" required>
+            </label>
+
+            <label class="field">
+                <span data-i18n="notes"></span>
+                <textarea name="notes" rows="3"></textarea>
+            </label>
+
+            <div class="field-row">
+                <label class="field">
+                    <span data-i18n="list"></span>
+                    <select name="list"></select>
+                </label>
+                <label class="field">
+                    <span data-i18n="priority"></span>
+                    <select name="priority">
+                        <option value="0" data-i18n="pNone"></option>
+                        <option value="1" data-i18n="pLow"></option>
+                        <option value="2" data-i18n="pMedium"></option>
+                        <option value="3" data-i18n="pHigh"></option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="field-row">
+                <label class="field">
+                    <span data-i18n="dueDate"></span>
+                    <input type="date" name="due">
+                </label>
+                <label class="field">
+                    <span data-i18n="dueTime"></span>
+                    <input type="time" name="time">
+                </label>
+            </div>
+
+            <div class="field-row">
+                <label class="field">
+                    <span data-i18n="reminder"></span>
+                    <select name="remind">
+                        <option value="-1" data-i18n="rNone"></option>
+                        <option value="0" data-i18n="rAtTime"></option>
+                        <option value="5" data-i18n="r5"></option>
+                        <option value="15" data-i18n="r15"></option>
+                        <option value="30" data-i18n="r30"></option>
+                        <option value="60" data-i18n="r60"></option>
+                        <option value="1440" data-i18n="r1440"></option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span data-i18n="repeat"></span>
+                    <select name="repeat">
+                        <option value="none" data-i18n="repNone"></option>
+                        <option value="daily" data-i18n="repDaily"></option>
+                        <option value="weekdays" data-i18n="repWeekdays"></option>
+                        <option value="weekly" data-i18n="repWeekly"></option>
+                        <option value="monthly" data-i18n="repMonthly"></option>
+                        <option value="yearly" data-i18n="repYearly"></option>
+                    </select>
+                </label>
+            </div>
+            <p id="remindError" class="field-error" hidden data-i18n="reminderNeedsDate"></p>
+
+            <label class="field">
+                <span data-i18n="tags"></span>
+                <input type="text" name="tags" data-i18n-placeholder="tagsHint">
+            </label>
+
+            <div class="field">
+                <span data-i18n="subtasks"></span>
+                <ul id="subtaskList" class="subtask-list"></ul>
+                <input type="text" id="subtaskInput" class="subtask-input" data-i18n-placeholder="addSubtask">
+            </div>
+
+            <footer class="dialog-footer">
+                <button type="button" id="deleteTaskBtn" class="btn danger" data-i18n="delete"></button>
+                <button type="button" id="icsBtn" class="btn" data-i18n="addToCalendar"></button>
+                <span class="spacer"></span>
+                <button type="button" class="btn" data-close data-i18n="cancel"></button>
+                <button type="submit" class="btn primary" data-i18n="save"></button>
+            </footer>
+        </form>
+    </dialog>
+
+    <!-- Settings -->
+    <dialog id="settings" class="dialog">
+        <div class="editor">
+            <header class="dialog-header">
+                <h2 data-i18n="settings"></h2>
+                <button type="button" class="icon-btn" data-close data-i18n-title="close">✕</button>
+            </header>
+
+            <section class="setting">
+                <h3 data-i18n="notifications"></h3>
+                <p id="notifyStatus" class="muted"></p>
+                <button type="button" id="enableNotifyBtn" class="btn primary" data-i18n="enableNotifications"></button>
+                <p class="muted small" data-i18n="notificationsHint"></p>
+                <label class="switch-row">
+                    <input type="checkbox" id="soundToggle">
+                    <span data-i18n="sound"></span>
+                </label>
+            </section>
+
+            <section class="setting">
+                <h3 data-i18n="language"></h3>
+                <div class="segmented" id="langSeg">
+                    <button type="button" data-value="ar">العربية</button>
+                    <button type="button" data-value="en">English</button>
+                </div>
+            </section>
+
+            <section class="setting">
+                <h3 data-i18n="theme"></h3>
+                <div class="segmented" id="themeSeg">
+                    <button type="button" data-value="auto" data-i18n="themeAuto"></button>
+                    <button type="button" data-value="light" data-i18n="themeLight"></button>
+                    <button type="button" data-value="dark" data-i18n="themeDark"></button>
+                </div>
+            </section>
+
+            <section class="setting">
+                <h3 data-i18n="data"></h3>
+                <div class="button-row">
+                    <button type="button" id="exportBtn" class="btn" data-i18n="exportData"></button>
+                    <button type="button" id="importBtn" class="btn" data-i18n="importData"></button>
+                    <button type="button" id="clearDoneBtn" class="btn danger" data-i18n="clearCompleted"></button>
+                </div>
+                <input type="file" id="importFile" accept="application/json,.json" hidden>
+            </section>
+        </div>
+    </dialog>
+
+    <div id="toasts" class="toasts" aria-live="polite"></div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/reminders.js"></script>
+    <script src="js/app.js"></script>
 </body>
 
 </html>

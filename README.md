@@ -3,6 +3,8 @@
 A complete task manager with reminders, built with plain HTML, CSS and JavaScript (no build step).
 Arabic (RTL) by default, with an English option.
 
+📖 **[الدليل الكامل بالعربي: التثبيت والتشغيل والاستخدام](docs/TUTORIAL.md)**
+
 ## Features
 
 - **Smart views:** Today (with overdue tasks), Upcoming, All tasks, Important, Completed
